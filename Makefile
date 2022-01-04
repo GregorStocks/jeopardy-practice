@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: clean freeze run black
+.PHONY: clean freeze run black curl
 
 venv: requirements.txt
 	rm -rf venv
@@ -18,3 +18,6 @@ black:
 
 run: venv
 	source venv/bin/activate && python api/main.py
+
+curl:
+	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"{ hello }","variables": {}}'
