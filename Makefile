@@ -14,7 +14,7 @@ clean:
 	rm -rf venv
 
 black:
-	source venv/bin/activate && black api/
+	source venv/bin/activate && black api/ alembic/
 
 run: venv
 	source venv/bin/activate && python api/main.py
