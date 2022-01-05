@@ -1,10 +1,13 @@
 alembic==1.7.5
+aniso8601==9.0.1
 beautifulsoup4==4.10.0
 black==21.12b0
 bs4==0.0.1
 click==8.0.3
 Flask==2.0.2
+graphene==3.0
 graphql-core==3.1.7
+graphql-relay==3.1.0
 graphql-server==3.0.0b4
 greenlet==1.1.2
 itsdangerous==2.0.1
