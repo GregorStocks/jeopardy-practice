@@ -35,7 +35,9 @@ def upgrade():
         "clues",
         sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
         sa.Column("game", sa.Integer, sa.ForeignKey("airdates.game"), nullable=False),
-        sa.Column("category", sa.Integer, sa.ForeignKey("categories.id"), nullable=False),
+        sa.Column(
+            "category", sa.Integer, sa.ForeignKey("categories.id"), nullable=False
+        ),
         sa.Column("round", sa.Integer, nullable=False),
         sa.Column("value", sa.Integer, nullable=False),
         sa.Column("clue", sa.String, nullable=False),

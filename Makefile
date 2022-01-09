@@ -17,7 +17,8 @@ black:
 	source venv/bin/activate && black api/ alembic/
 
 serve: venv
-	source venv/bin/activate && python api/main.py
+	source venv/bin/activate && PYTHONPATH=. python api/main.py
 
 curl:
-	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"mutation { ping(x:\"pong\") { ping } }","variables": {}}'
+	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"{ hello }","variables": {}}'; echo
+	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"mutation { ping(x:\"pong\") { ping } }","variables": {}}'; echo
