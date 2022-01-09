@@ -108,14 +108,14 @@ def parse_round(bsoup, cur, rnd, gid, airdate, game_comments, game_type):
 def insert(cur, gid, airdate, game_comments, game_type, rnd, category, value, text, answer):
     """Inserts the given clue into the database."""
     cur.execute(
-        "INSERT INTO airdates(game, airdate, game_comments, game_type) VALUES(%s, %s, %s, %s) ON CONFLICT DO NOTHING;",
+        "INSERT INTO games(id, airdate, game_comments, game_type) VALUES(%s, %s, %s, %s) ON CONFLICT DO NOTHING;",
         (gid, airdate, game_comments, game_type),
     )
     cur.execute("INSERT INTO categories(category) VALUES(%s) ON CONFLICT DO NOTHING", (category, ))
 
     cur.execute("SELECT id FROM categories WHERE category=%s", (category, ))
     category_id = cur.fetchone()
-    cur.execute("INSERT INTO clues(game, round, value, category, clue, answer) VALUES(%s, %s, %s, %s, %s, %s);", (gid, rnd, value, category_id, text, answer))
+    cur.execute("INSERT INTO clues(game_id, round, value, category_id, clue, answer) VALUES(%s, %s, %s, %s, %s, %s);", (gid, rnd, value, category_id, text, answer))
 
 
 if __name__ == "__main__":

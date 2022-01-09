@@ -18,8 +18,8 @@ depends_on = None
 
 def upgrade():
     op.create_table(
-        "airdates",
-        sa.Column("game", sa.Integer, primary_key=True),
+        "games",
+        sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("airdate", sa.String(), nullable=False),
         sa.Column("game_comments", sa.String()),
         sa.Column("game_type", sa.String(), nullable=False),
@@ -34,9 +34,9 @@ def upgrade():
     op.create_table(
         "clues",
         sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
-        sa.Column("game", sa.Integer, sa.ForeignKey("airdates.game"), nullable=False),
+        sa.Column("game_id", sa.Integer, sa.ForeignKey("airdates.id"), nullable=False),
         sa.Column(
-            "category", sa.Integer, sa.ForeignKey("categories.id"), nullable=False
+            "category_id", sa.Integer, sa.ForeignKey("categories.id"), nullable=False
         ),
         sa.Column("round", sa.Integer, nullable=False),
         sa.Column("value", sa.Integer, nullable=False),

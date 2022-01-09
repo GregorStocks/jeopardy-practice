@@ -13,7 +13,7 @@ freeze:
 clean:
 	rm -rf venv
 
-black:
+black: venv
 	source venv/bin/activate && black api/ alembic/
 
 serve: venv
@@ -22,3 +22,15 @@ serve: venv
 curl:
 	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"{ hello }","variables": {}}'; echo
 	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"mutation { ping(x:\"pong\") { ping } }","variables": {}}'; echo
+
+upgrade: venv
+	source venv/bin/activate && alembic upgrade head
+
+autogenerate: venv
+	read -p "Revision name:" REVISIONNAME; source venv/bin/activate && PYHTONPATH=. alembic revision --autogenerate -m "$$REVISIONNAME" ; black alembic
+
+parse: venv
+	source venv/bin/activate && scripts/parser.py
+
+psql:
+	PGPASSWORD=jeopardypassword psql -U jeopardy -d jeopardy
