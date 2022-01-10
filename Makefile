@@ -20,7 +20,7 @@ serve: venv
 	source venv/bin/activate && PYTHONPATH=. python api/main.py
 
 curl:
-	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"{ hello }","variables": {}}'; echo
+	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"{ numGames }","variables": {}}'; echo
 	curl 'http://localhost:5000/graphql' -H "Content-type: application/json" -XPOST --data-raw '{"query":"mutation { ping(x:\"pong\") { ping } }","variables": {}}'; echo
 
 upgrade: venv
