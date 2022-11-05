@@ -21,11 +21,14 @@ def main_parser(args):
     NUMBER_OF_FILES = args.num_of_files or len(os.listdir(args.dir))
     print("Parsing", NUMBER_OF_FILES, "files")
     with psycopg2.connect(
-            dbname="jeopardy", user="jeopardy", password="jeopardypassword", cursor_factory=RealDictCursor
+        dbname="jeopardy",
+        user="jeopardy",
+        password="jeopardypassword",
+        cursor_factory=RealDictCursor,
     ) as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT id FROM games")
-            already_loaded = set(f['id'] for f in cur.fetchall())
+            already_loaded = set(f["id"] for f in cur.fetchall())
             for i, file_name in enumerate(glob(os.path.join(args.dir, "*.html")), 1):
                 gid = os.path.splitext(os.path.basename(file_name))[0]
                 if int(gid) in already_loaded:
@@ -150,7 +153,7 @@ def insert(
     )
 
     cur.execute("SELECT id FROM categories WHERE category=%s", (category,))
-    category_id = cur.fetchone()['id']
+    category_id = cur.fetchone()["id"]
     cur.execute(
         "INSERT INTO clues(game_id, round, value, category_id, clue, answer) VALUES(%s, %s, %s, %s, %s, %s)",
         (gid, rnd, value, category_id, text, answer),
