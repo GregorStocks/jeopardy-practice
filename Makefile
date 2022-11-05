@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: clean freeze run black curl
+.PHONY: clean freeze run black curl psql parse autogenerate upgrade serve cli
 
 venv: requirements.txt
 	rm -rf venv
@@ -14,7 +14,7 @@ clean:
 	rm -rf venv
 
 black: venv
-	source venv/bin/activate && black api/ alembic/
+	source venv/bin/activate && black api/ alembic/ scripts/ cli/
 
 serve: venv
 	source venv/bin/activate && PYTHONPATH=. python api/main.py
@@ -27,10 +27,13 @@ upgrade: venv
 	source venv/bin/activate && alembic upgrade head
 
 autogenerate: venv
-	read -p "Revision name:" REVISIONNAME; source venv/bin/activate && PYHTONPATH=. alembic revision --autogenerate -m "$$REVISIONNAME" ; black alembic
+	read -p "Revision name:" REVISIONNAME; source venv/bin/activate && PYTHONPATH=. alembic revision --autogenerate -m "$$REVISIONNAME" ; black alembic
 
 parse: venv
 	source venv/bin/activate && scripts/parser.py
 
 psql:
 	PGPASSWORD=jeopardypassword psql -U jeopardy -d jeopardy
+
+cli:
+	source venv/bin/activate && cli/main.py

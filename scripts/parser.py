@@ -19,12 +19,17 @@ def main_parser(args):
         sys.exit(1)
     NUMBER_OF_FILES = args.num_of_files or len(os.listdir(args.dir))
     print("Parsing", NUMBER_OF_FILES, "files")
-    with psycopg2.connect(dbname="jeopardy", user="jeopardy", password="jeopardypassword") as conn:
+    with psycopg2.connect(
+        dbname="jeopardy", user="jeopardy", password="jeopardypassword"
+    ) as conn:
         with conn.cursor() as cur:
             for i, file_name in enumerate(glob(os.path.join(args.dir, "*.html")), 1):
                 with open(os.path.abspath(file_name)) as f:
                     gid = os.path.splitext(os.path.basename(file_name))[0]
-                    sys.stdout.write("\r %s done" % "{:.1%}".format(float(i)/float(NUMBER_OF_FILES)))
+                    sys.stdout.write(
+                        "\r %s done"
+                        % "{:.1%}".format(float(i) / float(NUMBER_OF_FILES))
+                    )
                     sys.stdout.flush()
                     parse_game(f, cur, int(gid))
     print("\nAll done")
@@ -59,7 +64,9 @@ def parse_game(f, cur, gid):
         game_type = "million_dollar_celebrity_invitational"
     else:
         game_type = "normal"
-    if not parse_round(bsoup, cur, 1, gid, airdate, game_comments, game_type) or not parse_round(bsoup, cur, 2, gid, airdate, game_comments, game_type):
+    if not parse_round(
+        bsoup, cur, 1, gid, airdate, game_comments, game_type
+    ) or not parse_round(bsoup, cur, 2, gid, airdate, game_comments, game_type):
         # One of the rounds does not exist
         pass
     # The final Jeopardy! round
@@ -73,7 +80,6 @@ def parse_game(f, cur, gid):
     answer = answer.find("em").get_text()
     # False indicates no preset value for a clue
     insert(cur, gid, airdate, game_comments, game_type, 3, category, 0, text, answer)
-
 
 
 def parse_round(bsoup, cur, rnd, gid, airdate, game_comments, game_type):
@@ -92,43 +98,80 @@ def parse_round(bsoup, cur, rnd, gid, airdate, game_comments, game_type):
     for a in r.find_all("td", class_="clue"):
         is_missing = True if not a.get_text().strip() else False
         if not is_missing:
-            value = a.find("td", class_=re.compile("clue_value")).get_text().lstrip("D: $").replace(",", "")
+            value = (
+                a.find("td", class_=re.compile("clue_value"))
+                .get_text()
+                .lstrip("D: $")
+                .replace(",", "")
+            )
             text = a.find("td", class_="clue_text").get_text()
-            answer = BeautifulSoup(a.find("div", onmouseover=True).get("onmouseover"), "lxml")
+            answer = BeautifulSoup(
+                a.find("div", onmouseover=True).get("onmouseover"), "lxml"
+            )
             answer = answer.find("em", class_="correct_response").get_text()
-            insert(cur, gid, airdate, game_comments, game_type, rnd, categories[x], value, text, answer)
+            insert(
+                cur,
+                gid,
+                airdate,
+                game_comments,
+                game_type,
+                rnd,
+                categories[x],
+                value,
+                text,
+                answer,
+            )
         # Always update x, even if we skip
         # a clue, as this keeps things in order. there
         # are 6 categories, so once we reach the end,
         # loop back to the beginning category.
-        x = (x+1) % 6
+        x = (x + 1) % 6
     return True
 
 
-def insert(cur, gid, airdate, game_comments, game_type, rnd, category, value, text, answer):
+def insert(
+    cur, gid, airdate, game_comments, game_type, rnd, category, value, text, answer
+):
     """Inserts the given clue into the database."""
     cur.execute(
         "INSERT INTO games(id, airdate, game_comments, game_type) VALUES(%s, %s, %s, %s) ON CONFLICT DO NOTHING;",
         (gid, airdate, game_comments, game_type),
     )
-    cur.execute("INSERT INTO categories(category) VALUES(%s) ON CONFLICT DO NOTHING", (category, ))
+    cur.execute(
+        "INSERT INTO categories(category) VALUES(%s) ON CONFLICT DO NOTHING",
+        (category,),
+    )
 
-    cur.execute("SELECT id FROM categories WHERE category=%s", (category, ))
+    cur.execute("SELECT id FROM categories WHERE category=%s", (category,))
     category_id = cur.fetchone()
-    cur.execute("INSERT INTO clues(game_id, round, value, category_id, clue, answer) VALUES(%s, %s, %s, %s, %s, %s);", (gid, rnd, value, category_id, text, answer))
+    cur.execute(
+        "INSERT INTO clues(game_id, round, value, category_id, clue, answer) VALUES(%s, %s, %s, %s, %s, %s);",
+        (gid, rnd, value, category_id, text, answer),
+    )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Parse games from the J! Archive website.", add_help=False,
-        usage="%(prog)s [options]")
-    parser.add_argument("-d", "--dir", dest="dir", metavar="<folder>",
-                        help="the directory containing the game files",
-                        default="../jeopardy-parser/j-archive")
-    parser.add_argument("-n", "--number-of-files", dest="num_of_files",
-                        metavar="<number>", help="the number of files to parse",
-                        type=int)
-    parser.add_argument("--help", action="help",
-                        help="show this help message and exit")
+        description="Parse games from the J! Archive website.",
+        add_help=False,
+        usage="%(prog)s [options]",
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        dest="dir",
+        metavar="<folder>",
+        help="the directory containing the game files",
+        default="../jeopardy-parser/j-archive",
+    )
+    parser.add_argument(
+        "-n",
+        "--number-of-files",
+        dest="num_of_files",
+        metavar="<number>",
+        help="the number of files to parse",
+        type=int,
+    )
+    parser.add_argument("--help", action="help", help="show this help message and exit")
     parser.add_argument("--version", action="version", version="2022.01.04")
     main_parser(parser.parse_args())
