@@ -162,7 +162,7 @@ if __name__ == "__main__":
         dest="dir",
         metavar="<folder>",
         help="the directory containing the game files",
-        default="../jeopardy-parser/j-archive",
+        default="data/j-archive",
     )
     parser.add_argument(
         "-n",
