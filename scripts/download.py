@@ -13,6 +13,7 @@ archive_folder = os.path.join(current_working_directory, "../data/j-archive")
 SECONDS_BETWEEN_REQUESTS = 1
 ERROR_MSG = "ERROR: No game"
 
+
 def main_download(page=1):
     if not os.path.isdir(archive_folder):
         print(("Making %s" % archive_folder))
@@ -23,6 +24,7 @@ def main_download(page=1):
             print("Finished downloading. Now parse.")
             return
         page += 1
+
 
 def download_and_save_page(page, sleep_time=SECONDS_BETWEEN_REQUESTS):
     new_file_name = "%s.html" % page
@@ -42,11 +44,11 @@ def download_and_save_page(page, sleep_time=SECONDS_BETWEEN_REQUESTS):
 
 
 def download_page(page):
-    url = 'https://j-archive.com/showgame.php?game_id=%s' % page
+    url = "https://j-archive.com/showgame.php?game_id=%s" % page
     html = None
     try:
         context = ssl.create_default_context()
-        context.check_hostname=False
+        context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         response = urllib.request.urlopen(url, context=context)
         if response.code == 200:
@@ -61,7 +63,7 @@ def download_page(page):
 
 def save_file(html, filename):
     try:
-        with open(filename, 'wb') as f:
+        with open(filename, "wb") as f:
             f.write(html)
     except IOError:
         print(("Couldn't write to file %s" % filename))

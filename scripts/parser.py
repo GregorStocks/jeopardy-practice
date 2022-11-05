@@ -23,15 +23,21 @@ def main_parser(args):
         dbname="jeopardy", user="jeopardy", password="jeopardypassword"
     ) as conn:
         with conn.cursor() as cur:
+            cur.execute("SELECT id FROM games")
+            already_loaded = set(f[0] for f in cur.fetchall())
             for i, file_name in enumerate(glob(os.path.join(args.dir, "*.html")), 1):
+                gid = os.path.splitext(os.path.basename(file_name))[0]
+                if int(gid) in already_loaded:
+                    continue
+
                 with open(os.path.abspath(file_name)) as f:
-                    gid = os.path.splitext(os.path.basename(file_name))[0]
+                    percentage_done = "{:.1}".format(float(i) / float(NUMBER_OF_FILES))
                     sys.stdout.write(
-                        "\r %s done"
-                        % "{:.1%}".format(float(i) / float(NUMBER_OF_FILES))
+                        f"\r {percentage_done}% done (processing {file_name})"
                     )
                     sys.stdout.flush()
                     parse_game(f, cur, int(gid))
+                    conn.commit()
     print("\nAll done")
 
 
@@ -134,7 +140,7 @@ def insert(
 ):
     """Inserts the given clue into the database."""
     cur.execute(
-        "INSERT INTO games(id, airdate, game_comments, game_type) VALUES(%s, %s, %s, %s) ON CONFLICT DO NOTHING;",
+        "INSERT INTO games(id, airdate, game_comments, game_type) VALUES(%s, %s, %s, %s) ON CONFLICT DO NOTHING",
         (gid, airdate, game_comments, game_type),
     )
     cur.execute(
@@ -145,7 +151,7 @@ def insert(
     cur.execute("SELECT id FROM categories WHERE category=%s", (category,))
     category_id = cur.fetchone()
     cur.execute(
-        "INSERT INTO clues(game_id, round, value, category_id, clue, answer) VALUES(%s, %s, %s, %s, %s, %s);",
+        "INSERT INTO clues(game_id, round, value, category_id, clue, answer) VALUES(%s, %s, %s, %s, %s, %s)",
         (gid, rnd, value, category_id, text, answer),
     )
 

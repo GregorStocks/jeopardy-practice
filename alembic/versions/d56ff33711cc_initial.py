@@ -51,6 +51,22 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("id"),
     )
+    op.create_table(
+        "clue_responses",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("clue_id", sa.Integer(), nullable=False),
+        sa.Column("answer_given", sa.String(), nullable=False),
+        sa.Column("was_correct", sa.Boolean(), nullable=False),
+        sa.Column("timestamp", sa.DateTime(), nullable=False, default="now()"),
+        sa.ForeignKeyConstraint(["clue_id"], ["clues.id"]),
+    )
+    op.create_table(
+        "game_attempts",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("game_id", sa.Integer(), nullable=False),
+        sa.Column("timestamp", sa.DateTime(), nullable=False, default="now()"),
+        sa.ForeignKeyConstraint(["game_id"], ["games.id"]),
+    )
 
 
 def downgrade():

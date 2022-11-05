@@ -1,11 +1,11 @@
 SHELL := /bin/bash
 
-.PHONY: clean freeze run black curl psql parse autogenerate upgrade serve cli venv
+.PHONY: clean freeze run black curl psql parse autogenerate upgrade serve cli
 
 venv:
 	rm -rf venv
 	python3 -m venv venv
-	source venv/bin/activate && pip install -r requirements.txt
+	source venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt
 
 freeze:
 	source venv/bin/activate && pip freeze > requirements.txt
@@ -40,3 +40,6 @@ cli:
 
 type:
 	source venv/bin/activate && pyright cli/
+
+download:
+	source venv/bin/activate && scripts/download.py
