@@ -67,8 +67,10 @@ def upgrade():
     op.create_table(
         "game_attempts",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("game_id", sa.Integer(), nullable=False, unique=True),
+        sa.Column("game_id", sa.Integer(), nullable=False),
         sa.Column("timestamp", sa.DateTime(), nullable=False, server_default="now()"),
+        sa.Column("total", sa.Integer()),
+        sa.Column("final_correct", sa.Integer()),
         sa.ForeignKeyConstraint(
             ["game_id"],
             ["games.id"],
