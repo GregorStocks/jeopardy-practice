@@ -1,4 +1,5 @@
 alembic==1.8.1
+ansicolors==1.1.8
 beautifulsoup4==4.11.1
 black==22.10.0
 click==8.1.3

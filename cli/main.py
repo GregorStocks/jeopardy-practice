@@ -2,6 +2,7 @@
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from colors import color
 
 
 def group_dicts_by(xs, k):
@@ -21,7 +22,7 @@ def ask_clue(conn, cur, game_id, clue):
     response = input("Answer? ")
     print(f"Actual answer: {clue['answer']}")
     correct = (response.lower() == clue["answer"].lower()) or (
-        input("Correct? [y/N] ").strip().lower() == "y"
+        (response.strip() != '' and input("Correct? [y/N] ").strip().lower() == "y")
     )
     cur.execute(
         """INSERT INTO clue_responses(clue_id, answer_given, was_correct) VALUES (%s, %s, %s)""",
@@ -54,20 +55,20 @@ def play_game(conn, cur, game_id):
     clues_by_round = group_dicts_by(cur.fetchall(), "round")
     total = 0
     for round in [1, 2]:
-        print(f"==================\nStarting round {round}:")
+        print(color(f"\nStarting round {round}:", fg='blue'))
         for category, clues in group_dicts_by(
             clues_by_round[round], "category"
         ).items():
-            print(f"===========\nStarting category {category}")
+            print(color(f"\nStarting category {category}", fg='red'))
             for clue in sorted(clues, key=lambda x: x["value"]):
                 total += clue["value"] * ask_clue(conn, cur, game_id, clue)
                 print(f"Total: ${total}")
 
-    print(f"FINAL JEOPARDY!!!!")
+    print(color("FINAL JEOPARDY!!!!", fg='red', style='underline'))
     final_correct = ask_clue(conn, cur, game_id, clues_by_round[3][0])
     cur.execute(
-        "UPDATE game_attempts(%s) SET total=%s, final_correct=%s",
-        (attempt_id, total, final_correct),
+        "UPDATE game_attempts SET total=%s, final_correct=%s WHERE id=%s",
+        (total, final_correct, attempt_id),
     )
 
 
@@ -82,7 +83,7 @@ def main(conn, cur):
     )
     game = cur.fetchone()
     print(
-        f"==========================================\nPlaying game {game['id']} ({game['airdate']})"
+        color(f"\nPlaying game {game['id']} ({game['airdate']})", fg='red')
     )
     play_game(conn, cur, game["id"])
 
