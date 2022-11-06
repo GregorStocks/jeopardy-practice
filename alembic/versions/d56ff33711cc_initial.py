@@ -38,7 +38,7 @@ def upgrade():
         sa.Column("game_id", sa.Integer(), nullable=False),
         sa.Column("category_id", sa.Integer(), nullable=False),
         sa.Column("round", sa.Integer(), nullable=False),
-        sa.Column("value", sa.Integer(), nullable=False),
+        sa.Column("normalized_value", sa.Integer(), nullable=False),
         sa.Column("clue", sa.String(), nullable=False),
         sa.Column("answer", sa.String(), nullable=False),
         sa.ForeignKeyConstraint(

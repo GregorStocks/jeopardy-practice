@@ -108,17 +108,15 @@ def parse_round(bsoup, cur, rnd, gid, airdate, game_comments, game_type):
     for a in r.find_all("td", class_="clue"):
         is_missing = True if not a.get_text().strip() else False
         if not is_missing:
-            value = (
-                a.find("td", class_=re.compile("clue_value"))
-                .get_text()
-                .lstrip("D: $")
-                .replace(",", "")
-            )
-            text = a.find("td", class_="clue_text").get_text()
+            text_td = a.find("td", class_="clue_text")
+
+            clue_number = int(text_td['id'][-1])
+            normalized_value = clue_number * 200 * rnd
+
+            text = text_td.get_text()
             answer = BeautifulSoup(
                 a.find("div", onmouseover=True).get("onmouseover"), "lxml"
-            )
-            answer = answer.find("em", class_="correct_response").get_text()
+            ).find("em", class_="correct_response").get_text()
             insert(
                 cur,
                 gid,
@@ -127,7 +125,7 @@ def parse_round(bsoup, cur, rnd, gid, airdate, game_comments, game_type):
                 game_type,
                 rnd,
                 categories[x],
-                value,
+                normalized_value,
                 text,
                 answer,
             )
@@ -140,7 +138,7 @@ def parse_round(bsoup, cur, rnd, gid, airdate, game_comments, game_type):
 
 
 def insert(
-    cur, gid, airdate, game_comments, game_type, rnd, category, value, text, answer
+    cur, gid, airdate, game_comments, game_type, rnd, category, normalized_value, text, answer
 ):
     """Inserts the given clue into the database."""
     cur.execute(
@@ -155,8 +153,8 @@ def insert(
     cur.execute("SELECT id FROM categories WHERE category=%s", (category,))
     category_id = cur.fetchone()["id"]
     cur.execute(
-        "INSERT INTO clues(game_id, round, value, category_id, clue, answer) VALUES(%s, %s, %s, %s, %s, %s)",
-        (gid, rnd, value, category_id, text, answer),
+        "INSERT INTO clues(game_id, round, normalized_value, category_id, clue, answer) VALUES(%s, %s, %s, %s, %s, %s)",
+        (gid, rnd, normalized_value, category_id, text, answer),
     )
 
 

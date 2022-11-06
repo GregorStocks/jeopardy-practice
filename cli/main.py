@@ -17,7 +17,7 @@ def group_dicts_by(xs, k):
 
 
 def ask_clue(conn, cur, game_id, clue):
-    value = clue["value"]
+    value = clue["normalized_value"]
     print(f"\n${value}: {clue['clue']}")
     response = input("Answer? ")
     print(f"Actual answer: {clue['answer']}")
@@ -47,7 +47,7 @@ def play_game(conn, cur, game_id):
     # Load clues and categories
     cur.execute(
         """
-        SELECT category, clues.id AS clue_id, round, value, clue, answer
+        SELECT category, clues.id AS clue_id, round, normalized_value, clue, answer
         FROM clues LEFT JOIN categories ON clues.category_id = categories.id
         WHERE clues.game_id = %s""",
         (game_id,),
@@ -60,8 +60,8 @@ def play_game(conn, cur, game_id):
             clues_by_round[round], "category"
         ).items():
             print(color(f"\nStarting category {category}", fg='red'))
-            for clue in sorted(clues, key=lambda x: x["value"]):
-                total += clue["value"] * ask_clue(conn, cur, game_id, clue)
+            for clue in sorted(clues, key=lambda x: x["normalized_value"]):
+                total += clue["normalized_value"] * ask_clue(conn, cur, game_id, clue)
                 print(f"Total: ${total}")
 
     print(color("FINAL JEOPARDY!!!!", fg='red', style='underline'))
